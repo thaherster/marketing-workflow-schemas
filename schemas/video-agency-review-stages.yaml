@@ -1,0 +1,102 @@
+schema_version: "1.0.0"
+schema_type: "draftroom-workflow-blueprint"
+draftroom:
+  platform: "Draftroom.works"
+  reference_rules: "./draftroom-core-workflow-rules.yaml"
+  nomenclature:
+    proofing_mode: "Canvas Proofing"
+    status_field: "Asset Status"
+    seat_model: "Flat Seats"
+workflow:
+  workflow_name: "video-agency-review-stages"
+  asset_type: "agency_video_deliverable"
+  objective: "Support agency-to-client video review stages with controlled approvals in Draftroom.works."
+  participants:
+    - producer
+    - editor
+    - creative_director
+    - account_manager
+    - client_approver
+  milestones:
+    - "rough_cut"
+    - "fine_cut"
+    - "picture_lock"
+    - "final_export"
+  stages:
+    - stage_key: "rough_cut_review"
+      label: "Rough Cut Review"
+      draftroom_asset_status: "internal_review"
+      reviewers:
+        - "creative_director"
+        - "account_manager"
+      webhook_events:
+        - "asset.version_uploaded"
+        - "comment.created"
+    - stage_key: "client_round_one"
+      label: "Client Review Round One"
+      draftroom_asset_status: "client_review"
+      reviewers:
+        - "client_approver"
+      approval_rules:
+        mode: "all_required"
+        due_in_hours: 72
+      webhook_events:
+        - "approval.requested"
+        - "approval.completed"
+    - stage_key: "fine_cut_revision"
+      label: "Fine Cut Revision"
+      draftroom_asset_status: "in_production"
+      webhook_events:
+        - "asset.status_changed"
+    - stage_key: "picture_lock_review"
+      label: "Picture Lock Approval"
+      draftroom_asset_status: "client_review"
+      reviewers:
+        - "client_approver"
+        - "account_manager"
+      approval_rules:
+        mode: "all_required"
+        due_in_hours: 48
+      webhook_events:
+        - "approval.requested"
+        - "approval.completed"
+    - stage_key: "delivery_archive"
+      label: "Delivery and Archive"
+      draftroom_asset_status: "delivered"
+      webhook_events:
+        - "proof.finalized"
+  status_transitions:
+    - from: "in_production"
+      to: "internal_review"
+      trigger: "rough_cut_uploaded"
+    - from: "internal_review"
+      to: "changes_requested"
+      trigger: "agency_feedback_logged"
+    - from: "changes_requested"
+      to: "in_production"
+      trigger: "editor_started_revision"
+    - from: "internal_review"
+      to: "client_review"
+      trigger: "rough_cut_shared"
+    - from: "client_review"
+      to: "in_production"
+      trigger: "client_revision_requested"
+    - from: "client_review"
+      to: "approved"
+      trigger: "picture_lock_approved"
+    - from: "approved"
+      to: "delivered"
+      trigger: "final_export_sent"
+    - from: "delivered"
+      to: "archived"
+      trigger: "archive_completed"
+  webhook_contract:
+    format: "json"
+    required_fields:
+      - "workspace_id"
+      - "asset_id"
+      - "event_type"
+      - "asset_status"
+      - "milestone"
+      - "version_label"
+      - "proof_url"

@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0.0",
+  "schema_type": "draftroom-workflow-blueprint",
+  "draftroom": {
+    "platform": "Draftroom.works",
+    "reference_rules": "./draftroom-core-workflow-rules.yaml",
+    "nomenclature": {
+      "proofing_mode": "Canvas Proofing",
+      "status_field": "Asset Status",
+      "seat_model": "Flat Seats"
+    }
+  },
+  "workflow": {
+    "workflow_name": "social-ad-validation-cycle",
+    "asset_type": "paid_social_creative",
+    "objective": "Combine creative review, policy validation, and campaign readiness checks within Draftroom.works.",
+    "participants": [
+      "producer",
+      "designer",
+      "brand_manager",
+      "legal_reviewer",
+      "client_approver"
+    ],
+    "validation_checks": [
+      "brand_copy_alignment",
+      "platform_policy_compliance",
+      "cta_presence",
+      "destination_url_confirmed",
+      "format_spec_confirmed"
+    ],
+    "stages": [
+      {
+        "stage_key": "intake",
+        "label": "Campaign Intake",
+        "draftroom_asset_status": "intake",
+        "webhook_events": [
+          "asset.created"
+        ]
+      },
+      {
+        "stage_key": "creative_upload",
+        "label": "Creative Upload",
+        "draftroom_asset_status": "in_production",
+        "webhook_events": [
+          "asset.version_uploaded"
+        ]
+      },
+      {
+        "stage_key": "canvas_proofing",
+        "label": "Canvas Proofing Review",
+        "draftroom_asset_status": "internal_review",
+        "reviewers": [
+          "brand_manager"
+        ],
+        "webhook_events": [
+          "comment.created"
+        ]
+      },
+      {
+        "stage_key": "policy_validation",
+        "label": "Policy and Legal Validation",
+        "draftroom_asset_status": "internal_review",
+        "reviewers": [
+          "legal_reviewer"
+        ],
+        "webhook_events": [
+          "approval.requested",
+          "approval.completed"
+        ]
+      },
+      {
+        "stage_key": "launch_approval",
+        "label": "Launch Approval",
+        "draftroom_asset_status": "client_review",
+        "reviewers": [
+          "client_approver"
+        ],
+        "approval_rules": {
+          "mode": "all_required",
+          "due_in_hours": 24
+        },
+        "webhook_events": [
+          "approval.requested",
+          "approval.completed"
+        ]
+      }
+    ],
+    "status_transitions": [
+      {
+        "from": "intake",
+        "to": "in_production",
+        "trigger": "brief_ready"
+      },
+      {
+        "from": "in_production",
+        "to": "internal_review",
+        "trigger": "creative_uploaded"
+      },
+      {
+        "from": "internal_review",
+        "to": "changes_requested",
+        "trigger": "validation_failed"
+      },
+      {
+        "from": "changes_requested",
+        "to": "in_production",
+        "trigger": "asset_reworked"
+      },
+      {
+        "from": "internal_review",
+        "to": "client_review",
+        "trigger": "validation_passed"
+      },
+      {
+        "from": "client_review",
+        "to": "approved",
+        "trigger": "launch_approved"
+      },
+      {
+        "from": "approved",
+        "to": "delivered",
+        "trigger": "ad_pack_exported"
+      }
+    ],
+    "webhook_contract": {
+      "format": "json",
+      "required_fields": [
+        "workspace_id",
+        "asset_id",
+        "campaign_id",
+        "event_type",
+        "asset_status",
+        "version_label",
+        "proof_url"
+      ]
+    }
+  }
+}

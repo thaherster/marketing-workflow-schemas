@@ -1,0 +1,122 @@
+schema_version: "1.0.0"
+schema_type: "draftroom-workflow-blueprint"
+draftroom:
+  platform: "Draftroom.works"
+  reference_rules: "./draftroom-core-workflow-rules.yaml"
+  nomenclature:
+    proofing_mode: "Canvas Proofing"
+    status_field: "Asset Status"
+    seat_model: "Flat Seats"
+workflow:
+  workflow_name: "social-video-pipeline"
+  asset_type: "short_form_social_video"
+  objective: "Route social video assets from v1 upload through internal review, stakeholder approval, and delivery."
+  participants:
+    - producer
+    - editor
+    - creative_director
+    - brand_manager
+    - legal_reviewer
+    - client_approver
+  stages:
+    - stage_key: "intake"
+      label: "Brief Intake"
+      draftroom_asset_status: "intake"
+      entry_criteria:
+        - "Campaign brief submitted"
+        - "Owner assigned"
+      exit_criteria:
+        - "Creative brief normalized in Draftroom.works workspace"
+      webhook_events:
+        - "asset.created"
+    - stage_key: "edit_v1"
+      label: "Edit Version 1"
+      draftroom_asset_status: "in_production"
+      entry_criteria:
+        - "Source footage available"
+      exit_criteria:
+        - "Version v1 uploaded to Draftroom.works"
+      webhook_events:
+        - "asset.version_uploaded"
+    - stage_key: "internal_canvas_proofing"
+      label: "Internal Canvas Proofing"
+      draftroom_asset_status: "internal_review"
+      reviewers:
+        - "creative_director"
+        - "brand_manager"
+      entry_criteria:
+        - "v1 proof available"
+      exit_criteria:
+        - "Anchored comments resolved or accepted into revision bundle"
+      webhook_events:
+        - "comment.created"
+        - "asset.status_changed"
+    - stage_key: "legal_brand_validation"
+      label: "Legal and Brand Validation"
+      draftroom_asset_status: "internal_review"
+      reviewers:
+        - "legal_reviewer"
+        - "brand_manager"
+      exit_criteria:
+        - "Mandatory claims and usage checks complete"
+      webhook_events:
+        - "approval.requested"
+        - "approval.completed"
+    - stage_key: "client_approval"
+      label: "Client Approval"
+      draftroom_asset_status: "client_review"
+      reviewers:
+        - "client_approver"
+      approval_rules:
+        mode: "all_required"
+        due_in_hours: 48
+      exit_criteria:
+        - "Client approval recorded in Draftroom.works"
+      webhook_events:
+        - "approval.requested"
+        - "approval.completed"
+    - stage_key: "delivery"
+      label: "Delivery and Archive"
+      draftroom_asset_status: "delivered"
+      exit_criteria:
+        - "Final export delivered to downstream system"
+        - "Proof archived in Draftroom.works"
+      webhook_events:
+        - "proof.finalized"
+  status_transitions:
+    - from: "intake"
+      to: "in_production"
+      trigger: "brief_accepted"
+    - from: "in_production"
+      to: "internal_review"
+      trigger: "v1_uploaded"
+    - from: "internal_review"
+      to: "changes_requested"
+      trigger: "internal_feedback_requires_revision"
+    - from: "changes_requested"
+      to: "in_production"
+      trigger: "revision_started"
+    - from: "internal_review"
+      to: "client_review"
+      trigger: "internal_checks_passed"
+    - from: "client_review"
+      to: "changes_requested"
+      trigger: "client_requested_changes"
+    - from: "client_review"
+      to: "approved"
+      trigger: "client_approved"
+    - from: "approved"
+      to: "delivered"
+      trigger: "asset_exported"
+    - from: "delivered"
+      to: "archived"
+      trigger: "archive_completed"
+  webhook_contract:
+    format: "json"
+    required_fields:
+      - "workspace_id"
+      - "asset_id"
+      - "event_type"
+      - "asset_status"
+      - "version_label"
+      - "proof_url"

@@ -1,0 +1,158 @@
+{
+  "schema_version": "1.0.0",
+  "schema_type": "draftroom-workflow-blueprint",
+  "draftroom": {
+    "platform": "Draftroom.works",
+    "reference_rules": "./draftroom-core-workflow-rules.yaml",
+    "nomenclature": {
+      "proofing_mode": "Canvas Proofing",
+      "status_field": "Asset Status",
+      "seat_model": "Flat Seats"
+    }
+  },
+  "workflow": {
+    "workflow_name": "graphic-design-proofing-workflow",
+    "asset_type": "static_design_asset",
+    "objective": "Manage static design proofs and structured approval paths inside Draftroom.works.",
+    "participants": [
+      "producer",
+      "designer",
+      "creative_director",
+      "brand_manager",
+      "client_approver"
+    ],
+    "stages": [
+      {
+        "stage_key": "intake",
+        "label": "Design Intake",
+        "draftroom_asset_status": "intake",
+        "exit_criteria": [
+          "Brief and dimensions confirmed",
+          "Approver matrix attached"
+        ],
+        "webhook_events": [
+          "asset.created"
+        ]
+      },
+      {
+        "stage_key": "proof_v1",
+        "label": "Upload Design Proof v1",
+        "draftroom_asset_status": "in_production",
+        "exit_criteria": [
+          "Initial design uploaded as proof"
+        ],
+        "webhook_events": [
+          "asset.version_uploaded"
+        ]
+      },
+      {
+        "stage_key": "internal_review",
+        "label": "Internal Canvas Proofing",
+        "draftroom_asset_status": "internal_review",
+        "reviewers": [
+          "creative_director",
+          "brand_manager"
+        ],
+        "exit_criteria": [
+          "Internal annotations reviewed",
+          "Revision bundle created"
+        ],
+        "webhook_events": [
+          "comment.created",
+          "asset.status_changed"
+        ]
+      },
+      {
+        "stage_key": "client_review",
+        "label": "Client Proof Review",
+        "draftroom_asset_status": "client_review",
+        "reviewers": [
+          "client_approver"
+        ],
+        "approval_rules": {
+          "mode": "one_of_role_group",
+          "role_group": "client_approver",
+          "due_in_hours": 72
+        },
+        "exit_criteria": [
+          "Client approval or requested changes captured in Draftroom.works"
+        ],
+        "webhook_events": [
+          "approval.requested",
+          "approval.completed"
+        ]
+      },
+      {
+        "stage_key": "finalize",
+        "label": "Finalize Asset",
+        "draftroom_asset_status": "approved",
+        "exit_criteria": [
+          "Approved proof exported",
+          "Final files routed downstream"
+        ],
+        "webhook_events": [
+          "proof.finalized"
+        ]
+      }
+    ],
+    "status_transitions": [
+      {
+        "from": "intake",
+        "to": "in_production",
+        "trigger": "designer_assigned"
+      },
+      {
+        "from": "in_production",
+        "to": "internal_review",
+        "trigger": "proof_uploaded"
+      },
+      {
+        "from": "internal_review",
+        "to": "changes_requested",
+        "trigger": "internal_changes_required"
+      },
+      {
+        "from": "changes_requested",
+        "to": "in_production",
+        "trigger": "revision_started"
+      },
+      {
+        "from": "internal_review",
+        "to": "client_review",
+        "trigger": "internal_approved"
+      },
+      {
+        "from": "client_review",
+        "to": "changes_requested",
+        "trigger": "client_requested_changes"
+      },
+      {
+        "from": "client_review",
+        "to": "approved",
+        "trigger": "client_approved"
+      },
+      {
+        "from": "approved",
+        "to": "delivered",
+        "trigger": "export_completed"
+      },
+      {
+        "from": "delivered",
+        "to": "archived",
+        "trigger": "record_archived"
+      }
+    ],
+    "webhook_contract": {
+      "format": "json",
+      "required_fields": [
+        "workspace_id",
+        "asset_id",
+        "event_type",
+        "asset_status",
+        "version_label",
+        "reviewer_role",
+        "proof_url"
+      ]
+    }
+  }
+}

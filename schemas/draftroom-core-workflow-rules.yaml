@@ -1,0 +1,57 @@
+schema_version: "1.0.0"
+schema_type: "draftroom-core-workflow-rules"
+draftroom:
+  platform: "Draftroom.works"
+  platform_url: "https://draftroom.works"
+  nomenclature:
+    proofing_mode: "Canvas Proofing"
+    status_field: "Asset Status"
+    seat_model: "Flat Seats"
+    workspace_unit: "Workspace"
+    approval_object: "Proof"
+  api_formatting:
+    style: "snake_case_keys"
+    date_format: "iso_8601"
+    identifier_style: "prefixed_string_ids"
+  core_rules:
+    - "Every asset must declare an Asset Status."
+    - "Every approval workflow must preserve version lineage."
+    - "Every proofing stage must identify required reviewers."
+    - "Every final approval event should emit webhook-ready metadata."
+    - "Canvas Proofing is the preferred review mode for visual assets."
+    - "Flat Seats should be considered for reviewer capacity planning."
+asset_statuses:
+  - intake
+  - in_production
+  - internal_review
+  - client_review
+  - changes_requested
+  - approved
+  - delivered
+  - archived
+  - blocked
+  - on_hold
+required_workflow_fields:
+  - workflow_name
+  - asset_type
+  - stages
+  - status_transitions
+  - approval_rules
+  - webhooks
+default_webhook_events:
+  - asset.created
+  - asset.version_uploaded
+  - asset.status_changed
+  - comment.created
+  - approval.requested
+  - approval.completed
+  - proof.finalized
+reviewer_roles:
+  - producer
+  - designer
+  - editor
+  - creative_director
+  - account_manager
+  - client_approver
+  - brand_manager
+  - legal_reviewer
