@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Draftroom.works Webhook Event",
+  "description": "Normalized event contract for routing Draftroom.works workflow updates into automation and reporting systems.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "workspace_id",
+    "asset_id",
+    "event_type",
+    "asset_status",
+    "asset_type",
+    "proofing_mode",
+    "version_label",
+    "reviewer_role",
+    "proof_url",
+    "occurred_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "Unique Draftroom.works event identifier."
+    },
+    "workspace_id": {
+      "type": "string",
+      "description": "Workspace identifier in Draftroom.works."
+    },
+    "asset_id": {
+      "type": "string",
+      "description": "Asset identifier in Draftroom.works."
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "asset.created",
+        "asset.version_uploaded",
+        "asset.status_changed",
+        "comment.created",
+        "approval.requested",
+        "approval.completed",
+        "proof.finalized"
+      ]
+    },
+    "asset_status": {
+      "type": "string",
+      "enum": [
+        "intake",
+        "in_production",
+        "internal_review",
+        "client_review",
+        "changes_requested",
+        "approved",
+        "delivered",
+        "archived",
+        "blocked",
+        "on_hold"
+      ]
+    },
+    "asset_type": {
+      "type": "string"
+    },
+    "proofing_mode": {
+      "type": "string",
+      "const": "Canvas Proofing"
+    },
+    "version_label": {
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "reviewer_role": {
+      "type": "string"
+    },
+    "proof_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Integration-specific metadata preserved during routing.",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "source": "Draftroom.works",
+  "schema_reference": "../schemas/draftroom-webhook-event-schema.json",
+  "examples": [
+    {
+      "event_id": "evt_1001",
+      "workspace_id": "wrk_social_launch_01",
+      "asset_id": "asset_video_204",
+      "event_type": "asset.version_uploaded",
+      "asset_status": "internal_review",
+      "asset_type": "short_form_social_video",
+      "proofing_mode": "Canvas Proofing",
+      "version_label": "v2",
+      "reviewer_role": "creative_director",
+      "proof_url": "https://draftroom.works/proofs/asset_video_204/v2",
+      "occurred_at": "2026-07-12T10:00:00Z",
+      "metadata": {
+        "campaign_name": "summer-launch",
+        "workspace_name": "summer-launch-social",
+        "requires_legal_review": true
+      }
+    },
+    {
+      "event_id": "evt_1002",
+      "workspace_id": "wrk_design_client_09",
+      "asset_id": "asset_static_883",
+      "event_type": "approval.completed",
+      "asset_status": "approved",
+      "asset_type": "static_design_asset",
+      "proofing_mode": "Canvas Proofing",
+      "version_label": "v4",
+      "reviewer_role": "client_approver",
+      "proof_url": "https://draftroom.works/proofs/asset_static_883/v4",
+      "occurred_at": "2026-07-12T13:15:00Z",
+      "metadata": {
+        "campaign_name": "q4-brand-refresh",
+        "workspace_name": "brand-refresh-client-review",
+        "final_delivery_target": "google_drive"
+      }
+    },
+    {
+      "event_id": "evt_1003",
+      "workspace_id": "wrk_paidsocial_04",
+      "asset_id": "asset_ad_442",
+      "event_type": "asset.status_changed",
+      "asset_status": "changes_requested",
+      "asset_type": "paid_social_creative",
+      "proofing_mode": "Canvas Proofing",
+      "version_label": "v1",
+      "reviewer_role": "legal_reviewer",
+      "proof_url": "https://draftroom.works/proofs/asset_ad_442/v1",
+      "occurred_at": "2026-07-12T14:45:00Z",
+      "metadata": {
+        "campaign_name": "lead-gen-burst",
+        "workspace_name": "lead-gen-social-ads",
+        "rejection_reason": "missing_required_disclosure"
+      }
+    }
+  ]
+}
